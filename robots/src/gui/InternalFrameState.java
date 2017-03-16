@@ -13,6 +13,7 @@ public class InternalFrameState implements Serializable
     {
         super();
         attributes=new HashMap<>();
+        name=frame.getClass().getName();
         attributes.put("x",frame.getX());
         attributes.put("y",frame.getY());
         attributes.put("width",frame.getWidth());

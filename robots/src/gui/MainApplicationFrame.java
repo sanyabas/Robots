@@ -58,11 +58,46 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
 
         addWindowListener(new WindowAdapter()
         {
-            public void windowClosing(WindowEvent arg0)
+            public void windowClosing(WindowEvent e)
             {
+                super.windowClosing(e);
                 onExit();
             }
+
+            @Override
+            public void windowOpened(WindowEvent e)
+            {
+                super.windowOpened(e);
+                onOpen();
+            }
         });
+    }
+
+    private void onOpen()
+    {
+        String directory = System.getProperty("user.home");
+        File file = new File(directory, fileName);
+        if (!file.exists())
+            return;
+        FrameState state=null;
+        try (FileInputStream fileStream = new FileInputStream(file);ObjectInputStream stream=new ObjectInputStream(fileStream))
+        {
+            state= (FrameState) stream.readObject();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        if (state !=null)
+            setState(state);
+    }
+
+    private void setState(FrameState state)
+    {
+        for (InternalFrameState internalState :
+                state.getFrames())
+        {
+           // if (internalState.name.Equals())
+        }
     }
 
     private void onExit()
@@ -73,7 +108,6 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
     private void saveState()
     {
         String directory = System.getProperty("user.home");
-        Path path = Paths.get(directory, fileName);
         File file = new File(directory, fileName);
         if (!file.exists())
             try

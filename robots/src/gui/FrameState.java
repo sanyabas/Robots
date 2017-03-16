@@ -16,6 +16,11 @@ public class FrameState implements Serializable
             frames.add(new InternalFrameState(internalFrame));
         }
     }
+
+    public ArrayList<InternalFrameState> getFrames()
+    {
+        return frames;
+    }
 }
 
 
