@@ -6,6 +6,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -25,9 +28,10 @@ import log.Logger;
  * 1. Метод создания меню перегружен функционалом и трудно читается.
  * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
  */
-public class MainApplicationFrame extends JFrame
+public class MainApplicationFrame extends JFrame implements SerializableFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private static final String fileName = "frame.state";
 
     public MainApplicationFrame()
     {
@@ -63,7 +67,30 @@ public class MainApplicationFrame extends JFrame
 
     private void onExit()
     {
-        System.out.println("qweqweqwe");
+        saveState();
+    }
+
+    private void saveState()
+    {
+        String directory = System.getProperty("user.home");
+        Path path = Paths.get(directory, fileName);
+        File file = new File(directory, fileName);
+        if (!file.exists())
+            try
+            {
+                file.createNewFile();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        try (FileOutputStream fileStream = new FileOutputStream(file); ObjectOutputStream stream = new ObjectOutputStream(fileStream))
+        {
+            serialize(stream);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     protected LogWindow createLogWindow()
@@ -117,7 +144,8 @@ public class MainApplicationFrame extends JFrame
         JMenuBar menuBar = new JMenuBar();
 
         JMenu fileMenu = createMenu("Файл", KeyEvent.VK_T, "Файл");
-        JMenuItem close = createMenuItem("Выход", KeyEvent.VK_S, (event) -> {
+        JMenuItem close = createMenuItem("Выход", KeyEvent.VK_S, (event) ->
+        {
             Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(
                     new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         });
@@ -166,7 +194,6 @@ public class MainApplicationFrame extends JFrame
     }
 
 
-
     private void setLookAndFeel(String className)
     {
         try
@@ -178,5 +205,23 @@ public class MainApplicationFrame extends JFrame
         {
             // just ignore
         }
+    }
+
+    @Override
+    public void serialize(ObjectOutputStream stream) throws IOException
+    {
+        FrameState state = new FrameState(this);
+        stream.writeObject(state);
+    }
+
+    @Override
+    public void restore(ObjectInputStream stream)
+    {
+
+    }
+
+    public JInternalFrame[] getAllFrames()
+    {
+        return desktopPane.getAllFrames();
     }
 }
