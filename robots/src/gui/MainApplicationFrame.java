@@ -7,27 +7,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 
-import com.sun.javafx.css.StyleCache;
 import log.Logger;
 
-/**
- * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается.
- * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- */
 public class MainApplicationFrame extends JFrame implements SerializableFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
@@ -46,22 +30,26 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
         setContentPane(desktopPane);
 
 
-        LogWindow logWindow = createLogWindow();
-        addWindow(logWindow);
-
-        GameWindow gameWindow = new GameWindow();
-        gameWindow.setSize(400, 400);
-        addWindow(gameWindow);
-
         setJMenuBar(generateMenuBar());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         addWindowListener(new WindowAdapter()
         {
             public void windowClosing(WindowEvent e)
             {
                 super.windowClosing(e);
-                onExit();
+                String[] buttons = new String[]{"Да", "Нет"};
+                int promptResult = JOptionPane.showOptionDialog(
+                        null,
+                        "Уверены, что хотите выйти?",
+                        "Выход",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        buttons,
+                        buttons[1]);
+                if (promptResult == JOptionPane.YES_OPTION)
+                    onExit();
             }
 
             @Override
@@ -79,30 +67,51 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
         File file = new File(directory, fileName);
         if (!file.exists())
             return;
-        FrameState state=null;
-        try (FileInputStream fileStream = new FileInputStream(file);ObjectInputStream stream=new ObjectInputStream(fileStream))
+        FrameState state = null;
+        try (FileInputStream fileStream = new FileInputStream(file); ObjectInputStream stream = new ObjectInputStream(fileStream))
         {
-            state= (FrameState) stream.readObject();
-        } catch (Exception e)
+            state=restore(stream);
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
         }
-        if (state !=null)
+        if (state != null)
             setState(state);
+        else
+        {
+            LogWindow logWindow = createLogWindow();
+            addWindow(logWindow);
+
+            GameWindow gameWindow = new GameWindow();
+            gameWindow.setSize(400, 400);
+            addWindow(gameWindow);
+        }
     }
 
     private void setState(FrameState state)
     {
-        for (InternalFrameState internalState :
-                state.getFrames())
+
+        for (InternalFrameState internalState : state.getFrames())
         {
-           // if (internalState.name.Equals())
+            if (internalState.name.equals(GameWindow.class.getName()))
+            {
+                GameWindow window = new GameWindow();
+                window.setState(internalState);
+                addWindow(window);
+            } else if (internalState.name.equals(LogWindow.class.getName()))
+            {
+                LogWindow window = createLogWindow();
+                window.setState(internalState);
+                addWindow(window);
+            }
         }
     }
 
     private void onExit()
     {
         saveState();
+        System.exit(0);
     }
 
     private void saveState()
@@ -113,8 +122,7 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
             try
             {
                 file.createNewFile();
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 e.printStackTrace();
             }
@@ -144,35 +152,6 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
         frame.setVisible(true);
     }
 
-//    protected JMenuBar createMenuBar() {
-//        JMenuBar menuBar = new JMenuBar();
-// 
-//        //Set up the lone menu.
-//        JMenu menu = new JMenu("Document");
-//        menu.setMnemonic(KeyEvent.VK_D);
-//        menuBar.add(menu);
-// 
-//        //Set up the first menu item.
-//        JMenuItem menuItem = new JMenuItem("New");
-//        menuItem.setMnemonic(KeyEvent.VK_N);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_N, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("new");
-////        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-// 
-//        //Set up the second menu item.
-//        menuItem = new JMenuItem("Quit");
-//        menuItem.setMnemonic(KeyEvent.VK_Q);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("quit");
-////        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-// 
-//        return menuBar;
-//    }
-
     private JMenuBar generateMenuBar()
     {
         JMenuBar menuBar = new JMenuBar();
@@ -185,6 +164,29 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
         });
         fileMenu.add(close);
         menuBar.add(fileMenu);
+
+        JMenu createMenu = createMenu("Создать", KeyEvent.VK_S, "Создать");
+        JMenuItem newLogWindow = createMenuItem("Окно лога", KeyEvent.VK_T, (event) ->
+        {
+            LogWindow window = createLogWindow();
+            addWindow(window);
+        });
+        JMenuItem newGameWindow = createMenuItem("Игровое окно", KeyEvent.VK_T, (event) ->
+        {
+            GameWindow window = new GameWindow();
+            window.setSize(400, 400);
+            addWindow(window);
+            PositionWindow posWindow = new PositionWindow(window.getVisualizer());
+            posWindow.setSize(200,200);
+            addWindow(posWindow);
+        });
+//        JMenuItem newPositionWindow = createMenuItem("Окно координат",KeyEvent.VK_T,(event)->
+//        {
+//            PositionWindow window = new PositionWindow()
+//        })
+        createMenu.add(newLogWindow);
+        createMenu.add(newGameWindow);
+        menuBar.add(createMenu);
 
         JMenu lookAndFeelMenu = createMenu("Режим отображения", KeyEvent.VK_V, "Управление режимом отображения приложения");
         JMenuItem systemLookAndFeel = createMenuItem("Системная схема", KeyEvent.VK_S, (event) ->
@@ -249,9 +251,10 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
     }
 
     @Override
-    public void restore(ObjectInputStream stream)
+    public FrameState restore(ObjectInputStream stream) throws IOException, ClassNotFoundException
     {
-
+        FrameState state = (FrameState) stream.readObject();
+        return state;
     }
 
     public JInternalFrame[] getAllFrames()

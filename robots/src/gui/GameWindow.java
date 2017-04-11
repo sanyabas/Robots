@@ -17,4 +17,15 @@ public class GameWindow extends JInternalFrame
         getContentPane().add(panel);
         pack();
     }
+
+    public GameVisualizer getVisualizer()
+    {
+        return m_visualizer;
+    }
+
+    public void setState(InternalFrameState state)
+    {
+        setLocation(state.attributes.get("x"),state.attributes.get("y"));
+        setSize(state.attributes.get("width"),state.attributes.get("height"));
+    }
 }
