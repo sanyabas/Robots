@@ -12,6 +12,7 @@ public class PositionWindow extends JInternalFrame implements Observer
     private JLabel xLabel;
     private JLabel yLabel;
     private JLabel angleLabel;
+    private JLabel dstAngleLabel;
 
     public PositionWindow(GameModel model)
     {
@@ -20,23 +21,29 @@ public class PositionWindow extends JInternalFrame implements Observer
         gameModel.addObserver(this);
         xLabel = new JLabel();
         xLabel.setLocation(50,10);
-        xLabel.setSize(50,20);
+        xLabel.setSize(100,20);
         xLabel.setText("xLabel");
 
         yLabel = new JLabel();
         yLabel.setLocation(50,40);
-        yLabel.setSize(50,20);
+        yLabel.setSize(100,20);
         yLabel.setText("yLabel");
 
         angleLabel = new JLabel();
         angleLabel.setLocation(50,70);
-        angleLabel.setSize(50,20);
+        angleLabel.setSize(100,20);
         angleLabel.setText("angleLabel");
 
+        dstAngleLabel = new JLabel();
+        dstAngleLabel.setLocation(50,100);
+        dstAngleLabel.setSize(50,20);
+        dstAngleLabel.setText("angleLabel");
+
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(xLabel,BorderLayout.NORTH);
-        panel.add(yLabel,BorderLayout.CENTER);
-        panel.add(angleLabel,BorderLayout.SOUTH);
+        panel.add(xLabel);
+        panel.add(yLabel);
+        panel.add(angleLabel);
+        panel.add(dstAngleLabel);
         getContentPane().add(panel);
         pack();
     }
@@ -52,5 +59,6 @@ public class PositionWindow extends JInternalFrame implements Observer
         xLabel.setText("X: "+gameModel.getRobotPositionX());
         yLabel.setText("Y: "+gameModel.getRobotPositionY());
         angleLabel.setText("Angle: "+gameModel.getRobotDirection());
+        dstAngleLabel.setText("dstAngle: "+gameModel.getTargetAngle());
     }
 }

@@ -14,10 +14,11 @@ public class GameModel extends java.util.Observable
         Timer timer = new Timer("events generator", true);
         return timer;
     }
+
     public GameModel()
     {
 //        addObserver(listener);
-        ticksCount=0;
+        ticksCount = 0;
 //        m_timer.schedule(new TimerTask()
 //        {
 //            @Override
@@ -28,29 +29,35 @@ public class GameModel extends java.util.Observable
 //        }, 0, 10);
     }
 
-    public double getRobotPositionX() {
+    public double getRobotPositionX()
+    {
         return m_robotPositionX;
     }
 
-    public double getRobotPositionY() {
+    public double getRobotPositionY()
+    {
         return m_robotPositionY;
     }
 
-    public double getRobotDirection() {
+    public double getRobotDirection()
+    {
         return m_robotDirection;
     }
 
-    public int getTargetPositionX() {
+    public int getTargetPositionX()
+    {
         return m_targetPositionX;
     }
 
-    public int getTargetPositionY() {
+    public int getTargetPositionY()
+    {
         return m_targetPositionY;
     }
 
     private volatile double m_robotPositionX = 100;
     private volatile double m_robotPositionY = 100;
     private volatile double m_robotDirection = 0;
+    private volatile double targetAngle;
 
     private volatile int m_targetPositionX = 150;
     private volatile int m_targetPositionY = 100;
@@ -79,6 +86,11 @@ public class GameModel extends java.util.Observable
         m_targetPositionY = p.y;
     }
 
+    public double getTargetAngle()
+    {
+        return targetAngle;
+    }
+
     protected void onModelUpdateEvent()
     {
         double distance = distance(m_targetPositionX, m_targetPositionY,
@@ -88,25 +100,22 @@ public class GameModel extends java.util.Observable
             return;
         }
         double velocity = maxVelocity;
-        double angleToTarget = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
-        double angularVelocity = 0;
-        if (angleToTarget > m_robotDirection)
+        targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
+        double angularVelocity = maxAngularVelocity;
+        double resAngle = targetAngle - m_robotDirection;
+        if (Math.abs(resAngle) > Math.PI)
+            resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
+        if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
         {
-            angularVelocity = maxAngularVelocity;
+            angularVelocity = (resAngle > 0) ? maxAngularVelocity : -maxAngularVelocity;
         }
-        if (angleToTarget < m_robotDirection)
-        {
-            angularVelocity = -maxAngularVelocity;
-        }
-
         moveRobot(velocity, angularVelocity, 10);
         ticksCount++;
-        if (ticksCount%5==0)
+        if (ticksCount % 5 == 0)
         {
             setChanged();
             notifyObservers();
         }
-        notifyObservers(123);
     }
 
     private static double applyLimits(double value, double min, double max)
@@ -123,14 +132,14 @@ public class GameModel extends java.util.Observable
         velocity = applyLimits(velocity, 0, maxVelocity);
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
         double newX = m_robotPositionX + velocity / angularVelocity *
-                (Math.sin(m_robotDirection  + angularVelocity * duration) -
+                (Math.sin(m_robotDirection + angularVelocity * duration) -
                         Math.sin(m_robotDirection));
         if (!Double.isFinite(newX))
         {
             newX = m_robotPositionX + velocity * duration * Math.cos(m_robotDirection);
         }
         double newY = m_robotPositionY - velocity / angularVelocity *
-                (Math.cos(m_robotDirection  + angularVelocity * duration) -
+                (Math.cos(m_robotDirection + angularVelocity * duration) -
                         Math.cos(m_robotDirection));
         if (!Double.isFinite(newY))
         {
@@ -146,12 +155,14 @@ public class GameModel extends java.util.Observable
     {
         while (angle < 0)
         {
-            angle += 2*Math.PI;
+            angle += 2 * Math.PI;
         }
-        while (angle >= 2*Math.PI)
+        while (angle >= 2 * Math.PI)
         {
-            angle -= 2*Math.PI;
+            angle -= 2 * Math.PI;
         }
+//        if (Math.abs(angle)>Math.PI)
+//            angle=-(2*Math.PI-Math.abs(angle))*Math.signum(angle);
         return angle;
     }
 }
