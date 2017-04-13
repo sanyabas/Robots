@@ -4,28 +4,28 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by sanyabas on 11.04.17.
- */
-public class Game
+public class GameModel extends java.util.Observable
 {
     private final Timer m_timer = initTimer();
+    private int ticksCount;
 
     private static Timer initTimer()
     {
         Timer timer = new Timer("events generator", true);
         return timer;
     }
-    public Game()
+    public GameModel()
     {
-        m_timer.schedule(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                onModelUpdateEvent();
-            }
-        }, 0, 10);
+//        addObserver(listener);
+        ticksCount=0;
+//        m_timer.schedule(new TimerTask()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                onModelUpdateEvent();
+//            }
+//        }, 0, 10);
     }
 
     public double getRobotPositionX() {
@@ -100,6 +100,13 @@ public class Game
         }
 
         moveRobot(velocity, angularVelocity, 10);
+        ticksCount++;
+        if (ticksCount%5==0)
+        {
+            setChanged();
+            notifyObservers();
+        }
+        notifyObservers(123);
     }
 
     private static double applyLimits(double value, double min, double max)

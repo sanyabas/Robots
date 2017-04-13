@@ -1,20 +1,19 @@
 package gui;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
-public class GameVisualizer extends JPanel
-{
+public class GameVisualizer extends JPanel {
     private final Timer m_timer = initTimer();
-    private final Game game;
+    private GameModel gameModel;
     private double robotX;
     private double robotY;
     
@@ -24,21 +23,9 @@ public class GameVisualizer extends JPanel
         return timer;
     }
     
-//    private volatile double m_robotPositionX = 100;
-//    private volatile double m_robotPositionY = 100;
-//    private volatile double m_robotDirection = 0;
-//
-//    private volatile int m_targetPositionX = 150;
-//    private volatile int m_targetPositionY = 100;
-//
-//    private static final double maxVelocity = 0.1;
-//    private static final double maxAngularVelocity = 0.001;
-    
-    public GameVisualizer(Game gameModel)
+    public GameVisualizer(GameModel model)
     {
-        game=gameModel;
-        robotX=game.getRobotPositionX();
-        robotY=game.getRobotPositionY();
+        gameModel=model;
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -47,14 +34,15 @@ public class GameVisualizer extends JPanel
                 onRedrawEvent();
             }
         }, 0, 50);
-//        m_timer.schedule(new TimerTask()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                onModelUpdateEvent();
-//            }
-//        }, 0, 10);
+        m_timer.schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                gameModel.onModelUpdateEvent();
+            }
+        }, 0, 10);
+
         addMouseListener(new MouseAdapter()
         {
             @Override
@@ -69,7 +57,7 @@ public class GameVisualizer extends JPanel
 
     protected void setTargetPosition(Point p)
     {
-       game.setTargetPosition(p);
+       gameModel.setTargetPosition(p);
     }
     
     protected void onRedrawEvent()
@@ -90,8 +78,8 @@ public class GameVisualizer extends JPanel
     {
         super.paint(g);
         Graphics2D g2d = (Graphics2D)g; 
-        drawRobot(g2d, round(robotX), round(robotY), game.getRobotDirection());
-        drawTarget(g2d, game.getTargetPositionX(), game.getTargetPositionY());
+        drawRobot(g2d, round(gameModel.getRobotPositionX()), round(gameModel.getRobotPositionY()), gameModel.getRobotDirection());
+        drawTarget(g2d, gameModel.getTargetPositionX(), gameModel.getTargetPositionY());
     }
     
     private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2)
@@ -106,8 +94,8 @@ public class GameVisualizer extends JPanel
     
     private void drawRobot(Graphics2D g, int x, int y, double direction)
     {
-        int robotCenterX = round(robotX);
-        int robotCenterY = round(robotY);
+        int robotCenterX = round(gameModel.getRobotPositionX());
+        int robotCenterY = round(gameModel.getRobotPositionY());
         AffineTransform t = AffineTransform.getRotateInstance(direction, robotCenterX, robotCenterY); 
         g.setTransform(t);
         g.setColor(Color.MAGENTA);

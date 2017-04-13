@@ -83,7 +83,7 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
             LogWindow logWindow = createLogWindow();
             addWindow(logWindow);
 
-            GameWindow gameWindow = new GameWindow();
+            GameWindow gameWindow = new GameWindow(this);
             gameWindow.setSize(400, 400);
             addWindow(gameWindow);
         }
@@ -96,7 +96,7 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
         {
             if (internalState.name.equals(GameWindow.class.getName()))
             {
-                GameWindow window = new GameWindow();
+                GameWindow window = new GameWindow(this);
                 window.setState(internalState);
                 addWindow(window);
             } else if (internalState.name.equals(LogWindow.class.getName()))
@@ -173,12 +173,10 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
         });
         JMenuItem newGameWindow = createMenuItem("Игровое окно", KeyEvent.VK_T, (event) ->
         {
-            GameWindow window = new GameWindow();
+            GameWindow window = new GameWindow(this);
             window.setSize(400, 400);
             addWindow(window);
-            PositionWindow posWindow = new PositionWindow(window.getVisualizer());
-            posWindow.setSize(200,200);
-            addWindow(posWindow);
+
         });
 //        JMenuItem newPositionWindow = createMenuItem("Окно координат",KeyEvent.VK_T,(event)->
 //        {
