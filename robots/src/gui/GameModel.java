@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.*;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class GameModel extends java.util.Observable
 {
@@ -17,16 +16,7 @@ public class GameModel extends java.util.Observable
 
     public GameModel()
     {
-//        addObserver(listener);
         ticksCount = 0;
-//        m_timer.schedule(new TimerTask()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                onModelUpdateEvent();
-//            }
-//        }, 0, 10);
     }
 
     public double getRobotPositionX()
@@ -102,8 +92,6 @@ public class GameModel extends java.util.Observable
         }
         targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
         double resAngle = targetAngle - m_robotDirection;
-//        if (distance < rotationRadius*0.8  && Math.abs(resAngle)>1)
-//            moveRobot(maxVelocity, 0, 10);
         if (Math.abs(resAngle)>0.05)
         {
             double velocity = maxVelocity;
@@ -113,7 +101,6 @@ public class GameModel extends java.util.Observable
             if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
             {
                 angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
-//            angularVelocity = (resAngle > 0) ? maxAngularVelocity : -maxAngularVelocity;
             }
             moveRobot(0, angularVelocity, 10);
         }
@@ -172,8 +159,6 @@ public class GameModel extends java.util.Observable
         {
             angle -= 2 * Math.PI;
         }
-//        if (Math.abs(angle)>Math.PI)
-//            angle=-(2*Math.PI-Math.abs(angle))*Math.signum(angle);
         return angle;
     }
 }

@@ -178,10 +178,6 @@ public class MainApplicationFrame extends JFrame implements SerializableFrame
             addWindow(window);
 
         });
-//        JMenuItem newPositionWindow = createMenuItem("Окно координат",KeyEvent.VK_T,(event)->
-//        {
-//            PositionWindow window = new PositionWindow()
-//        })
         createMenu.add(newLogWindow);
         createMenu.add(newGameWindow);
         menuBar.add(createMenu);
