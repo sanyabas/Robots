@@ -95,21 +95,28 @@ public class GameModel extends java.util.Observable
     {
         double distance = distance(m_targetPositionX, m_targetPositionY,
                 m_robotPositionX, m_robotPositionY);
+        double rotationRadius = maxVelocity / maxAngularVelocity;
         if (distance < 0.5)
         {
             return;
         }
-        double velocity = maxVelocity;
         targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
-        double angularVelocity = maxAngularVelocity;
         double resAngle = targetAngle - m_robotDirection;
-        if (Math.abs(resAngle) > Math.PI)
-            resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
-        if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
+        if (distance < rotationRadius*0.8  && Math.abs(resAngle)>1)
+            moveRobot(maxVelocity, 0, 10);
+        else
         {
-            angularVelocity = (resAngle > 0) ? maxAngularVelocity : -maxAngularVelocity;
+            double velocity = maxVelocity;
+            double angularVelocity = 0;
+            if (Math.abs(resAngle) > Math.PI)
+                resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
+            if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
+            {
+                angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
+//            angularVelocity = (resAngle > 0) ? maxAngularVelocity : -maxAngularVelocity;
+            }
+            moveRobot(velocity, angularVelocity, 10);
         }
-        moveRobot(velocity, angularVelocity, 10);
         ticksCount++;
         if (ticksCount % 5 == 0)
         {
