@@ -102,9 +102,9 @@ public class GameModel extends java.util.Observable
         }
         targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
         double resAngle = targetAngle - m_robotDirection;
-        if (distance < rotationRadius*0.8  && Math.abs(resAngle)>1)
-            moveRobot(maxVelocity, 0, 10);
-        else
+//        if (distance < rotationRadius*0.8  && Math.abs(resAngle)>1)
+//            moveRobot(maxVelocity, 0, 10);
+        if (Math.abs(resAngle)>0.05)
         {
             double velocity = maxVelocity;
             double angularVelocity = 0;
@@ -115,7 +115,11 @@ public class GameModel extends java.util.Observable
                 angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
 //            angularVelocity = (resAngle > 0) ? maxAngularVelocity : -maxAngularVelocity;
             }
-            moveRobot(velocity, angularVelocity, 10);
+            moveRobot(0, angularVelocity, 10);
+        }
+        else
+        {
+            moveRobot(maxVelocity, 0, 10);
         }
         ticksCount++;
         if (ticksCount % 5 == 0)
