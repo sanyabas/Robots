@@ -1,12 +1,15 @@
 package gui;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Timer;
 
 public class GameModel extends java.util.Observable
 {
     private final Timer m_timer = initTimer();
     private int ticksCount;
+
+    private ArrayList<Obstacle> obstacles;
 
     private static Timer initTimer()
     {
@@ -17,6 +20,7 @@ public class GameModel extends java.util.Observable
     public GameModel()
     {
         ticksCount = 0;
+        obstacles = new ArrayList<>();
     }
 
     public double getRobotPositionX()
@@ -42,6 +46,11 @@ public class GameModel extends java.util.Observable
     public int getTargetPositionY()
     {
         return m_targetPositionY;
+    }
+
+    public ArrayList<Obstacle> getObstacles()
+    {
+        return obstacles;
     }
 
     private volatile double m_robotPositionX = 100;
@@ -92,7 +101,7 @@ public class GameModel extends java.util.Observable
         }
         targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
         double resAngle = targetAngle - m_robotDirection;
-        if (Math.abs(resAngle)>0.05)
+        if (Math.abs(resAngle) > 0.05)
         {
             double velocity = maxVelocity;
             double angularVelocity = 0;
@@ -103,8 +112,7 @@ public class GameModel extends java.util.Observable
                 angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
             }
             moveRobot(0, angularVelocity, 10);
-        }
-        else
+        } else
         {
             moveRobot(maxVelocity, 0, 10);
         }
@@ -114,6 +122,11 @@ public class GameModel extends java.util.Observable
             setChanged();
             notifyObservers();
         }
+    }
+
+    public void AddObstacle(Dimension bounds)
+    {
+        obstacles.add(Obstacle.Random(bounds));
     }
 
     private static double applyLimits(double value, double min, double max)
