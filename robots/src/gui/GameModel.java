@@ -1,5 +1,9 @@
 package gui;
 
+import path_finder.AStarPathFinder;
+import path_finder.AbstractPathFinder;
+import path_finder.Map;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -8,8 +12,10 @@ public class GameModel extends java.util.Observable
 {
     private final Timer m_timer = initTimer();
     private int ticksCount;
-
     private ArrayList<Obstacle> obstacles;
+    private Dimension bounds;
+    private Map map;
+    private AbstractPathFinder pathFinder;
 
     private static Timer initTimer()
     {
@@ -48,6 +54,11 @@ public class GameModel extends java.util.Observable
         return m_targetPositionY;
     }
 
+    public void setBounds(Dimension bounds)
+    {
+        this.bounds = bounds;
+    }
+
     public ArrayList<Obstacle> getObstacles()
     {
         return obstacles;
@@ -64,7 +75,7 @@ public class GameModel extends java.util.Observable
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.001;
 
-    private static double distance(double x1, double y1, double x2, double y2)
+    public static double distance(double x1, double y1, double x2, double y2)
     {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
@@ -83,6 +94,9 @@ public class GameModel extends java.util.Observable
     {
         m_targetPositionX = p.x;
         m_targetPositionY = p.y;
+        map = new Map(bounds,obstacles);
+        pathFinder=new AStarPathFinder(map);
+        pathFinder.findPath(m_robotPositionX,m_robotPositionY,m_targetPositionX,m_targetPositionY);
     }
 
     public double getTargetAngle()

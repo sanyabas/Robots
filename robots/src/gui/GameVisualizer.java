@@ -13,7 +13,6 @@ import javax.swing.*;
 
 public class GameVisualizer extends JPanel
 {
-    private final Timer m_timer = initTimer();
     private GameModel gameModel;
     private double robotX;
     private double robotY;
@@ -27,6 +26,7 @@ public class GameVisualizer extends JPanel
     public GameVisualizer(GameModel model)
     {
         gameModel = model;
+        Timer m_timer = initTimer();
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -50,7 +50,10 @@ public class GameVisualizer extends JPanel
             public void mouseClicked(MouseEvent e)
             {
                 if (SwingUtilities.isLeftMouseButton(e))
+                {
+                    model.setBounds(getSize());
                     setTargetPosition(e.getPoint());
+                }
                 else if (SwingUtilities.isRightMouseButton(e))
                     gameModel.AddObstacle(getSize());
                 repaint();
@@ -130,8 +133,7 @@ public class GameVisualizer extends JPanel
     private void drawObstacles(Graphics2D g)
     {
         g.setColor(Color.RED);
-        for (Obstacle obstacle :
-                gameModel.getObstacles())
+        for (Obstacle obstacle : gameModel.getObstacles())
         {
             fillRect(g, obstacle.getRectangle());
         }
