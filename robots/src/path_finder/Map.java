@@ -39,8 +39,8 @@ public class Map
             int upperLeftCol = getColumn(obstacle.getX());
             int lowerRightRow = getRow(obstacle.getY() + obstacle.getHeight());
             int lowerRightCol = getColumn(obstacle.getX() + obstacle.getWidth());
-            for (int row = upperLeftRow; row <= lowerRightRow; row++)
-                for (int col = upperLeftCol; col <= lowerRightCol; col++)
+            for (int row = upperLeftRow; row < lowerRightRow; row++)
+                for (int col = upperLeftCol; col < lowerRightCol; col++)
                     mapArray[row][col].setObstacle(true);
         }
     }

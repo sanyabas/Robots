@@ -7,7 +7,7 @@ public abstract class AbstractPathFinder
 {
     protected Map map;
 
-    protected Iterable<MapCell> getNeighbours(MapCell cell)
+    protected Iterable<MapCell> getNeighbours(MapCell cell, Boolean toExit)
     {
         ArrayList<MapCell> result = new ArrayList<>();
         int cellRow = cell.getCenterY() / MapCell.Size;
@@ -23,6 +23,12 @@ public abstract class AbstractPathFinder
                 MapCell neighbour = map.getCell(resultRow, resultCol);
                 if (neighbour.getObstacle() || resultRow >= map.Height || resultCol >= map.Width)
                     continue;
+                if (!toExit)
+                {
+                    ArrayList<MapCell> a = (ArrayList<MapCell>) getNeighbours(neighbour, true);
+                    if (a.size() < 8)
+                        continue;
+                }
                 result.add(neighbour);
             }
         }
@@ -39,14 +45,15 @@ public abstract class AbstractPathFinder
             finish = finish.getParent();
         }
         Collections.reverse(path);
+
         return path;
     }
 
-    public ArrayList<MapCell> findPath(double startX,double startY,double finishX,double finishY)
+    public ArrayList<MapCell> findPath(double startX, double startY, double finishX, double finishY)
     {
-        MapCell start=map.getCellFromCoords(startX,startY);
-        MapCell finish=map.getCellFromCoords(finishX,finishY);
-        return findPath(start,finish);
+        MapCell start = map.getCellFromCoords(startX, startY);
+        MapCell finish = map.getCellFromCoords(finishX, finishY);
+        return findPath(start, finish);
     }
 
     public abstract ArrayList<MapCell> findPath(MapCell start, MapCell finish);

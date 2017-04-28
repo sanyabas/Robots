@@ -12,7 +12,7 @@ public class MapCell implements Comparable<MapCell>
     private Boolean isObstacle;
 
     private MapCell parent;
-    public static final int Size = 2;
+    public static final int Size = 5;
     private int wayDistance;
     private int distance;
     public MapCell(int centerX, int centerY, Boolean isObstacle, MapCell parent)

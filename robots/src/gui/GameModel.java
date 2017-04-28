@@ -3,6 +3,7 @@ package gui;
 import path_finder.AStarPathFinder;
 import path_finder.AbstractPathFinder;
 import path_finder.Map;
+import path_finder.MapCell;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ public class GameModel extends java.util.Observable
     private Dimension bounds;
     private Map map;
     private AbstractPathFinder pathFinder;
+    private ArrayList<MapCell> path;
+    private int counter;
 
     private static Timer initTimer()
     {
@@ -96,7 +99,8 @@ public class GameModel extends java.util.Observable
         m_targetPositionY = p.y;
         map = new Map(bounds,obstacles);
         pathFinder=new AStarPathFinder(map);
-        pathFinder.findPath(m_robotPositionX,m_robotPositionY,m_targetPositionX,m_targetPositionY);
+        path=pathFinder.findPath(m_robotPositionX,m_robotPositionY,m_targetPositionX,m_targetPositionY);
+        counter=1;
     }
 
     public double getTargetAngle()
@@ -106,35 +110,46 @@ public class GameModel extends java.util.Observable
 
     protected void onModelUpdateEvent()
     {
-        double distance = distance(m_targetPositionX, m_targetPositionY,
+        if (path==null)
+            return;
+        double distance = distance(path.get(counter).getCenterX(), path.get(counter).getCenterY(),
+                m_robotPositionX, m_robotPositionY);
+        if (distance < 0.5 && counter<path.size()-1)
+        {
+            counter++;
+        }
+        moveRobotTo(path.get(counter));
+        ticksCount++;
+        if (ticksCount % 5 == 0)
+        {
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    private void moveRobotTo(MapCell cell)
+    {
+
+        double distance = distance(cell.getCenterX(), cell.getCenterY(),
                 m_robotPositionX, m_robotPositionY);
         double rotationRadius = maxVelocity / maxAngularVelocity;
         if (distance < 0.5)
         {
             return;
         }
-        targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
+        targetAngle = angleTo(m_robotPositionX, m_robotPositionY, cell.getCenterX(), cell.getCenterY());
         double resAngle = targetAngle - m_robotDirection;
-        if (Math.abs(resAngle) > 0.05)
+        if (Math.abs(resAngle) > Math.PI)
+            resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
+        if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
         {
             double velocity = maxVelocity;
             double angularVelocity = 0;
-            if (Math.abs(resAngle) > Math.PI)
-                resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
-            if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
-            {
                 angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
-            }
             moveRobot(0, angularVelocity, 10);
         } else
         {
             moveRobot(maxVelocity, 0, 10);
-        }
-        ticksCount++;
-        if (ticksCount % 5 == 0)
-        {
-            setChanged();
-            notifyObservers();
         }
     }
 

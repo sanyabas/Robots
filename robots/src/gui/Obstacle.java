@@ -21,10 +21,10 @@ public class Obstacle
     public static Obstacle Random(Dimension borders)
     {
         Random random = new Random();
-        int x = random.nextInt((int) borders.getWidth());
-        int y = random.nextInt((int) borders.getHeight());
         int width = random.nextInt((int) borders.getWidth()/5);
         int height = random.nextInt((int) borders.getHeight()/5);
+        int x = random.nextInt((int) borders.getWidth()-width);
+        int y = random.nextInt((int) borders.getHeight()-height);
         return new Obstacle(x, y, width, height);
     }
 

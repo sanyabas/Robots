@@ -35,7 +35,7 @@ public class AStarPathFinder extends AbstractPathFinder
             MapCell current = list.get(0);
             if (current.equals(finish))
                 return getPath(current);
-            Iterable<MapCell> neighbours = getNeighbours(current);
+            Iterable<MapCell> neighbours = getNeighbours(current,false);
             for (MapCell neighbour : neighbours)
             {
                 if (closed.contains(neighbour))
