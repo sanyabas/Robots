@@ -1,9 +1,10 @@
 package path_finder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public abstract class AbstractPathFinder
+public abstract class AbstractPathFinder implements Serializable
 {
     protected Map map;
 

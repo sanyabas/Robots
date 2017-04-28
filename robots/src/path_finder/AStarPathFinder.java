@@ -2,12 +2,12 @@ package path_finder;
 
 import gui.GameModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.TreeSet;
 
-public class AStarPathFinder extends AbstractPathFinder
+public class AStarPathFinder extends AbstractPathFinder implements Serializable
 {
     public AStarPathFinder(Map map)
     {

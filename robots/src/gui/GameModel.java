@@ -6,12 +6,12 @@ import path_finder.Map;
 import path_finder.MapCell;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Timer;
 
-public class GameModel extends java.util.Observable
+public class GameModel extends java.util.Observable implements Serializable
 {
-    private final Timer m_timer = initTimer();
     private int ticksCount;
     private ArrayList<Obstacle> obstacles;
     private Dimension bounds;
@@ -19,12 +19,6 @@ public class GameModel extends java.util.Observable
     private AbstractPathFinder pathFinder;
     private ArrayList<MapCell> path;
     private int counter;
-
-    private static Timer initTimer()
-    {
-        Timer timer = new Timer("events generator", true);
-        return timer;
-    }
 
     public GameModel()
     {

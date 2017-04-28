@@ -3,9 +3,10 @@ package path_finder;
 import gui.Obstacle;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Map
+public class Map implements Serializable
 {
     private MapCell[][] mapArray;
     public final int Width;

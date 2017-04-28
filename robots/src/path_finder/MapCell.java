@@ -2,7 +2,9 @@ package path_finder;
 
 import gui.GameModel;
 
-public class MapCell implements Comparable<MapCell>
+import java.io.Serializable;
+
+public class MapCell implements Comparable<MapCell>,Serializable
 {
     private int row;
     private int column;

@@ -1,9 +1,10 @@
 package gui;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.Random;
 
-public class Obstacle
+public class Obstacle implements Serializable
 {
     private int x;
     private int y;

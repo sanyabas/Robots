@@ -13,6 +13,16 @@ import javax.swing.*;
 
 public class GameVisualizer extends JPanel
 {
+    public GameModel getGameModel()
+    {
+        return gameModel;
+    }
+
+    public void setGameModel(GameModel gameModel)
+    {
+        this.gameModel = gameModel;
+    }
+
     private GameModel gameModel;
     private double robotX;
     private double robotY;
@@ -51,7 +61,7 @@ public class GameVisualizer extends JPanel
             {
                 if (SwingUtilities.isLeftMouseButton(e))
                 {
-                    model.setBounds(getSize());
+                    gameModel.setBounds(getSize());
                     setTargetPosition(e.getPoint());
                 }
                 else if (SwingUtilities.isRightMouseButton(e))
