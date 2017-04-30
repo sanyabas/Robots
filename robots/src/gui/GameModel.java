@@ -1,32 +1,29 @@
 package gui;
 
+import path_finder.AStarPathFinder;
+import path_finder.AbstractPathFinder;
+import path_finder.Map;
+import path_finder.MapCell;
+
 import java.awt.*;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Timer;
-import java.util.TimerTask;
 
-public class GameModel extends java.util.Observable
+public class GameModel extends java.util.Observable implements Serializable
 {
-    private final Timer m_timer = initTimer();
     private int ticksCount;
-
-    private static Timer initTimer()
-    {
-        Timer timer = new Timer("events generator", true);
-        return timer;
-    }
+    private ArrayList<Obstacle> obstacles;
+    private Dimension bounds;
+    private Map map;
+    private AbstractPathFinder pathFinder;
+    private ArrayList<MapCell> path;
+    private int counter;
 
     public GameModel()
     {
-//        addObserver(listener);
         ticksCount = 0;
-//        m_timer.schedule(new TimerTask()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                onModelUpdateEvent();
-//            }
-//        }, 0, 10);
+        obstacles = new ArrayList<>();
     }
 
     public double getRobotPositionX()
@@ -54,6 +51,16 @@ public class GameModel extends java.util.Observable
         return m_targetPositionY;
     }
 
+    public void setBounds(Dimension bounds)
+    {
+        this.bounds = bounds;
+    }
+
+    public ArrayList<Obstacle> getObstacles()
+    {
+        return obstacles;
+    }
+
     private volatile double m_robotPositionX = 100;
     private volatile double m_robotPositionY = 100;
     private volatile double m_robotDirection = 0;
@@ -65,7 +72,7 @@ public class GameModel extends java.util.Observable
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.001;
 
-    private static double distance(double x1, double y1, double x2, double y2)
+    public static double distance(double x1, double y1, double x2, double y2)
     {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
@@ -84,6 +91,10 @@ public class GameModel extends java.util.Observable
     {
         m_targetPositionX = p.x;
         m_targetPositionY = p.y;
+        map = new Map(bounds,obstacles);
+        pathFinder=new AStarPathFinder(map);
+        path=pathFinder.findPath(m_robotPositionX,m_robotPositionY,m_targetPositionX,m_targetPositionY);
+        counter=1;
     }
 
     public double getTargetAngle()
@@ -93,36 +104,52 @@ public class GameModel extends java.util.Observable
 
     protected void onModelUpdateEvent()
     {
-        double distance = distance(m_targetPositionX, m_targetPositionY,
-                m_robotPositionX, m_robotPositionY);
-        double rotationRadius = maxVelocity / maxAngularVelocity;
-        if (distance < 0.5)
-        {
+        if (path==null)
             return;
-        }
-        targetAngle = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
-        double resAngle = targetAngle - m_robotDirection;
-        if (distance < rotationRadius*0.8  && Math.abs(resAngle)>1)
-            moveRobot(maxVelocity, 0, 10);
-        else
+        double distance = distance(path.get(counter).getCenterX(), path.get(counter).getCenterY(),
+                m_robotPositionX, m_robotPositionY);
+        if (distance < 0.5 && counter<path.size()-1)
         {
-            double velocity = maxVelocity;
-            double angularVelocity = 0;
-            if (Math.abs(resAngle) > Math.PI)
-                resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
-            if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
-            {
-                angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
-//            angularVelocity = (resAngle > 0) ? maxAngularVelocity : -maxAngularVelocity;
-            }
-            moveRobot(velocity, angularVelocity, 10);
+            counter++;
         }
+        moveRobotTo(path.get(counter));
         ticksCount++;
         if (ticksCount % 5 == 0)
         {
             setChanged();
             notifyObservers();
         }
+    }
+
+    private void moveRobotTo(MapCell cell)
+    {
+
+        double distance = distance(cell.getCenterX(), cell.getCenterY(),
+                m_robotPositionX, m_robotPositionY);
+        double rotationRadius = maxVelocity / maxAngularVelocity;
+        if (distance < 0.5)
+        {
+            return;
+        }
+        targetAngle = angleTo(m_robotPositionX, m_robotPositionY, cell.getCenterX(), cell.getCenterY());
+        double resAngle = targetAngle - m_robotDirection;
+        if (Math.abs(resAngle) > Math.PI)
+            resAngle = -(2 * Math.PI - Math.abs(resAngle)) * Math.signum(resAngle);
+        if (Math.abs(resAngle) > 0.05 && Math.abs(resAngle) < 1.95 * Math.PI)
+        {
+            double velocity = maxVelocity;
+            double angularVelocity = 0;
+                angularVelocity = Math.signum(resAngle) * maxAngularVelocity;
+            moveRobot(0, angularVelocity, 10);
+        } else
+        {
+            moveRobot(maxVelocity, 0, 10);
+        }
+    }
+
+    public void AddObstacle(Dimension bounds)
+    {
+        obstacles.add(Obstacle.Random(bounds));
     }
 
     private static double applyLimits(double value, double min, double max)
@@ -168,8 +195,6 @@ public class GameModel extends java.util.Observable
         {
             angle -= 2 * Math.PI;
         }
-//        if (Math.abs(angle)>Math.PI)
-//            angle=-(2*Math.PI-Math.abs(angle))*Math.signum(angle);
         return angle;
     }
 }
